@@ -53,16 +53,8 @@ and specify your Grid'5000 credentials:
 
 #### Reserve a node
 
-```shell
-<username>@fnancy:~$ oarsub -p gros -l host=1,walltime=1 -I
-OAR_JOB_ID=4088412
-# Interactive mode: waiting...
-# Starting...
-<username>@gros-20:~$ 
-```
-
-**Optional**: use tmux before reserving a node. When reserving and using a node on Grid'5000 (in interactive mode),
-being disconnected from the session will terminate the current job. To avoid this, we strongly recommend using tmux.
+When reserving and using a node on Grid'5000 (in interactive mode), being disconnected from the session will terminate
+the current job. To avoid this, we strongly recommend using tmux.
 
 ```shell
 <username>@fnancy:~$ tmux new -s my-session
@@ -71,6 +63,14 @@ being disconnected from the session will terminate the current job. To avoid thi
 In addition, this allows to go back on the frontend without terminating the current job (hit `Ctrl+B D` to return on the
 frontend, and execute `tmux a -t my-session` to reattach the current session on the screen). This is useful, for
 instance, to increase the walltime of a running job. See https://github.com/tmux/tmux/wiki for more details.
+
+```shell
+<username>@fnancy:~$ oarsub -p gros -l host=1,walltime=1 -I
+OAR_JOB_ID=4088412
+# Interactive mode: waiting...
+# Starting...
+<username>@gros-20:~$ 
+```
 
 #### Setup Docker
 
@@ -90,40 +90,18 @@ Let us start with a simple and quick experiment to check that everything is corr
 ```
 
 ```shell
-<username>@gros-20:~$ docker run -d --rm \
-                      --network host \
-                      --mount type=bind,source="$(pwd)",target=/root \
-                      --mount type=bind,source="$(pwd)"/hector/log,target=/usr/src/app/log \
-                      --mount type=bind,source="$(pwd)"/hector/output,target=/usr/src/app/experiment/output \
+<username>@gros-20:~$ docker run -d --net=host \
+                      -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
+                      -v ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro \
+                      -v ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro \
+                      -v ~/hector/log:/usr/src/app/log:rw \
+                      -v ~/hector/output:/usr/src/app/experiment/output:rw \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/run.sh experiment/input/helloworld.csv --job-name helloworld --start-index 10 --walltime 1:00:00 --log log
 ```
 
 ```shell
-<username>@gros-20:~$ tail -f hector/log/helloworld.log
-```
-
-#### Post-processing results
-
-```shell
-<username>@gros-20:~$ mkdir -p hector/archives
-```
-
-```shell
-<username>@gros-20:~$ docker run --rm \
-                      --mount type=bind,source="$(pwd)"/hector/output,target=/usr/src/app/experiment/output \
-                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
-                      adugois1/hector-benchmarking:latest \
-                      ./scripts/tidy.sh experiment/output/helloworld --archive
-```
-
-#### Analyzing and plotting data
-
-```shell
-<username>@gros-20:~$ docker run --rm \
-                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
-                      adugois1/hector-benchmarking:latest \
-                      ./scripts/plot.sh plots/helloworld.R experiment/archives/helloworld
+<username>@gros-20:~$ tail -f ~/hector/log/helloworld.log
 ```
 
 ## Reproduce experiments
