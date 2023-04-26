@@ -175,6 +175,54 @@ Let us start with a simple and quick experiment to check that everything is corr
                       ./scripts/report.sh
 ```
 
-## Comparing results
+## Compare results
 
-TODO
+The report is a PDF file that should summarize the results shown in the paper: Figures 4, 5, 6, 7, 8, 9 and 10, and
+Tables 1, 2 and 3. For each figure and table, we describe below the main results that should be reproduced.
+
+**Figure 4.**
+This figure shows the maximum attainable throughput for Apache Cassandra and Hector. We want to show that both systems
+achieve similar results in the nominal case. Therefore, the two columns should represent similar values, and the error
+bars should indicate that the (small) difference between the two columns is not significant.
+
+**Figure 5.**
+This figure shows the latency for Apache Cassandra and Hector with two arrival rates. It is complementary to Figure 4,
+i.e., we want to make sure that both systems behave similarly. Thus, in each facet, the two columns should represent
+similar values, and the error bars should indicate that the (small) difference between the two columns is not
+significant.
+
+**Figure 6.**
+This figure shows the maximum attainable throughput for 3 different scheduling algorithms (DS, C3 and PA) under two
+key popularity distributions. In the left facet, the curves should be different, with DS being always lower than PA.
+Ideally, C3 should progressively increase over time. In the right facet, all curves should be more or less similar.
+
+**Figure 7.**
+This figure shows the volume of data that is read over time for DS, C3 and PA under two key popularity distributions.
+It is complementary to Figure 6: PA should be always lower than DS, and C3 should ideally decrease over time.
+
+**Figure 8.**
+This figure shows the attainable throughput of 2 different scheduling algorithms (FCFS and RML) as a function of the
+arrival rate. FCFS should saturate faster than RML, i.e., the columns should be capped earlier.
+
+**Figure 9.**
+This figure shows the latency of FCFS and RML as a function of the arrival rate. It is complementary to Figure 8. In
+each facet, RML should show lower latencies than FCFS, possibly with some exceptions for high arrival rates
+(>= 50 kops/s). However, the median latencies (top-right facet) should be very low compared to FCFS, for all shown
+arrival rates.
+
+**Figure 10.**
+This figure shows the latency of small and large requests for different arrival rates. It is complementary to Figure 9.
+For the first arrival rate value, FCFS and RML should show similar results. When RML reaches its saturating throughput
+(see Figure 8), the latency of small requests in RML should be lower than the latency of small requests in FCFS.
+
+**Table 1.**
+This table is complementary to Figure 4 and shows absolute throughputs, as well as differences between both systems. The
+differences should be small, i.e., the relative difference should be around 1%.
+
+**Table 2.**
+This table is complementary to Figure 5 and shows absolute latencies, as well as differences between both systems. The
+differences should be small, i.e., the relative difference should be around 1%.
+
+**Table 3.**
+This table is complementary to Figure 6 and summarizes the distribution of throughput values that have been recorded
+over time. We should simply see values that are consistent with Figure 6.
