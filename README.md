@@ -43,6 +43,7 @@ and specify your Grid'5000 credentials:
     <username>@fnancy:~$ echo '
     username: <username>
     password: <password>
+    verify_ssl: false
     ' > ~/.python-grid5000.yaml
     
     <username>@fnancy:~$ chmod 600 ~/.python-grid5000.yaml
@@ -91,9 +92,9 @@ Let us start with a simple and quick experiment to check that everything is corr
 ```shell
 <username>@gros-20:~$ docker run -d --rm \
                       --network host \
-                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
-                      --mount type=bind,source=~/hector/log,target=/usr/src/app/log \
-                      --mount type=bind,source=~/hector/output,target=/usr/src/app/experiment/output \
+                      --mount type=bind,source="$(pwd)",target=/root \
+                      --mount type=bind,source="$(pwd)"/hector/log,target=/usr/src/app/log \
+                      --mount type=bind,source="$(pwd)"/hector/output,target=/usr/src/app/experiment/output \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/run.sh experiment/input/helloworld.csv --job-name helloworld --start-index 10 --walltime 1:00:00 --log log
 ```
@@ -110,8 +111,8 @@ Let us start with a simple and quick experiment to check that everything is corr
 
 ```shell
 <username>@gros-20:~$ docker run --rm \
-                      --mount type=bind,source=~/hector/output,target=/usr/src/app/experiment/output \
-                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source="$(pwd)"/hector/output,target=/usr/src/app/experiment/output \
+                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/tidy.sh experiment/output/helloworld --archive
 ```
@@ -120,7 +121,7 @@ Let us start with a simple and quick experiment to check that everything is corr
 
 ```shell
 <username>@gros-20:~$ docker run --rm \
-                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/plot.sh plots/helloworld.R experiment/archives/helloworld
 ```
@@ -136,8 +137,8 @@ Let us start with a simple and quick experiment to check that everything is corr
 ```shell
 <username>@gros-20:~$ docker run -d --rm \
                       --network host \
-                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
-                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source="$(pwd)",target=/root \
+                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/xp1_baseline.sh 10 48:00:00
 ```
@@ -145,8 +146,8 @@ Let us start with a simple and quick experiment to check that everything is corr
 ```shell
 <username>@gros-20:~$ docker run -d --rm \
                       --network host \
-                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
-                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source="$(pwd)",target=/root \
+                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/xp2_replica_selection.sh 10 48:00:00
 ```
@@ -154,8 +155,8 @@ Let us start with a simple and quick experiment to check that everything is corr
 ```shell
 <username>@gros-20:~$ docker run -d --rm \
                       --network host \
-                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
-                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source="$(pwd)",target=/root \
+                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/xp3_local_scheduling.sh 10 48:00:00
 ```
@@ -169,8 +170,8 @@ Let us start with a simple and quick experiment to check that everything is corr
 ```shell
 <username>@gros-20:~$ docker run -d --rm \
                       --network host \
-                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
-                      --mount type=bind,source=~/hector/report,target=/usr/src/app/experiment/report \
+                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source="$(pwd)"/hector/report,target=/usr/src/app/experiment/report \
                       adugois1/hector-benchmarking:latest \
                       ./scripts/report.sh
 ```

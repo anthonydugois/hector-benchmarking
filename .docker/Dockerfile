@@ -9,6 +9,9 @@ RUN apt-get update && \
     pip install --no-cache-dir -r requirements.txt && \
     R -e "install.packages('tidyverse')" && \
     R -e "install.packages('tikzDevice')" && \
-    chmod +x scripts/*
+    mkdir -p /.ansible && \
+    chmod 666 -R /.ansible && \
+    chmod 666 -R /usr/src/app && \
+    chmod 777 scripts/*
 
 CMD [ "./scripts/run.sh", "--help" ]
