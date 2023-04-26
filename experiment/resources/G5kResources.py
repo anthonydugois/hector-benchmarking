@@ -96,8 +96,12 @@ class G5kResources:
         if with_docker is not None:
             logging.info("Installing Docker...")
 
-            with Path(".credentials").open("r") as file:
-                credentials = safe_load(file)
+            credential_path = Path(".credentials")
+            if credential_path.exists():
+                with credential_path.open("r") as file:
+                    credentials = safe_load(file)
+            else:
+                credentials = None
 
             docker = en.Docker(agent=self.roles[with_docker],
                                bind_var_docker=self.bind_var_docker,

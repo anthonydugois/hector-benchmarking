@@ -10,9 +10,6 @@ RUN apt-get update && \
     R -e "install.packages('tidyverse')" && \
     R -e "install.packages('tikzDevice')"
 
-RUN mkdir -p /.ansible && \
-    chmod 666 -R /.ansible && \
-    chmod 666 -R /usr/src/app && \
-    chmod 777 scripts/*
+RUN chmod 777 scripts/*
 
 CMD [ "./scripts/run.sh", "--help" ]
