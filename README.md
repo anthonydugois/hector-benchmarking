@@ -127,7 +127,53 @@ Let us start with a simple and quick experiment to check that everything is corr
 
 ## Reproduce experiments
 
-TODO
+### Run experiments
+
+```shell
+<username>@gros-20:~$ mkdir -p hector/archives
+```
+
+```shell
+<username>@gros-20:~$ docker run -d --rm \
+                      --network host \
+                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
+                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      adugois1/hector-benchmarking:latest \
+                      ./scripts/xp1_baseline.sh 10 48:00:00
+```
+
+```shell
+<username>@gros-20:~$ docker run -d --rm \
+                      --network host \
+                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
+                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      adugois1/hector-benchmarking:latest \
+                      ./scripts/xp2_replica_selection.sh 10 48:00:00
+```
+
+```shell
+<username>@gros-20:~$ docker run -d --rm \
+                      --network host \
+                      --mount type=bind,source=~/.python-grid5000.yaml,target=/root/.python-grid5000.yaml \
+                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      adugois1/hector-benchmarking:latest \
+                      ./scripts/xp3_local_scheduling.sh 10 48:00:00
+```
+
+### Report results
+
+```shell
+<username>@gros-20:~$ mkdir -p hector/report
+```
+
+```shell
+<username>@gros-20:~$ docker run -d --rm \
+                      --network host \
+                      --mount type=bind,source=~/hector/archives,target=/usr/src/app/experiment/archives \
+                      --mount type=bind,source=~/hector/report,target=/usr/src/app/experiment/report \
+                      adugois1/hector-benchmarking:latest \
+                      ./scripts/report.sh
+```
 
 ## Comparing results
 
