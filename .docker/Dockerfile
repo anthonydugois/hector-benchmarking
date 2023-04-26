@@ -8,8 +8,9 @@ RUN apt-get update && \
     apt-get install -y r-base texlive && \
     pip install --no-cache-dir -r requirements.txt && \
     R -e "install.packages('tidyverse')" && \
-    R -e "install.packages('tikzDevice')" && \
-    mkdir -p /.ansible && \
+    R -e "install.packages('tikzDevice')" \
+
+RUN mkdir -p /.ansible && \
     chmod 666 -R /.ansible && \
     chmod 666 -R /usr/src/app && \
     chmod 777 scripts/*

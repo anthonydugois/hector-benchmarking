@@ -20,3 +20,5 @@ jobs:
           context: .
           push: true
           tags: adugois1/hector-benchmarking:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
