@@ -204,9 +204,10 @@ class NBDriver(Driver):
 
         with en.actions(roles=hosts) as actions:
             actions.docker_container(name=NBDriver.CONTAINER_NAME, image=self.docker_image, detach="no",
-                                     network_mode="host", mounts=self.mounts(), command="{{command}}")
+                                     network_mode="host", mounts=self.mounts(), command="{{command}}",
+                                     restart="yes", timeout="3600")
 
-            actions.docker_container(name=NBDriver.CONTAINER_NAME, state="absent")
+            # actions.docker_container(name=NBDriver.CONTAINER_NAME, state="absent")
 
         for host in hosts:
             host.extra.update(command=None)
