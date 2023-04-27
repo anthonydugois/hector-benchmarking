@@ -43,7 +43,6 @@ and specify your Grid'5000 credentials:
     <username>@fnancy:~$ echo '
     username: <username>
     password: <password>
-    verify_ssl: false
     ' > ~/.python-grid5000.yaml
     
     <username>@fnancy:~$ chmod 600 ~/.python-grid5000.yaml
@@ -84,12 +83,12 @@ single command:
 #### A simple experiment
 
 Let us start with a simple and quick experiment to check that everything is correctly setup. First, we create
-`hector/log` and `hector/output` folders to save some data from the Docker filesystem. `hector/log` will contain the
-experiment log files, which are useful to follow the process while it is running, and `hector/output` will contain the
-raw results of the experiment.
+`hector/log` and `hector/archives` folders to save some data from the Docker filesystem. `hector/log` will contain the
+experiment log files, which are useful to follow the process while it is running, and `hector/archives` will contain the
+gzipped results of the experiment.
 
 ```shell
-<username>@gros-20:~$ mkdir -p hector/log hector/output
+<username>@gros-20:~$ mkdir -p hector/log hector/archives
 ```
 
 Now we run the experiment (estimated duration: 60 minutes). This is done through a Docker container that handles all the
@@ -104,9 +103,33 @@ needs, for instance, to have access to our SSH keys. We also give him access to 
                       -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
                       -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
                       -v ~/hector/log:/usr/src/app/log:rw \
-                      -v ~/hector/output:/usr/src/app/experiment/output:rw \
+                      -v ~/hector/archives:/usr/src/app/experiment/archives:rw \
                       adugois1/hector-benchmarking:latest \
-                      ./scripts/run.sh experiment/input/helloworld.csv --job-name helloworld --start-index 21 --walltime 1:00:00 --log log
+                      sh scripts/helloworld.sh nancy gros 21 1:00:00
+```
+
+**Tip.** For more convenience, we can make a custom shell script `start.sh` to avoid crafting a complex Docker command
+each time we need to launch an experiment. This will be useful in the next section.
+
+```shell
+#!/bin/sh
+
+mkdir -p hector/log hector/archives
+
+docker run --detach --network host \
+   -v ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro \
+   -v ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro \
+   -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
+   -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
+   -v ~/hector/log:/usr/src/app/log:rw \
+   -v ~/hector/archives:/usr/src/app/experiment/archives:rw \
+   adugois1/hector-benchmarking:latest sh "$@"
+```
+
+Do not forget to make it executable (`chmod +x start.sh`). Then we can use it like that:
+
+```shell
+<username>@gros-20:~$ ./start.sh scripts/helloworld.sh nancy gros 21 1:00:00
 ```
 
 We can track the experiment process by looking at the logs, which update in real time through the network thanks to the
@@ -118,7 +141,7 @@ from there.
 ```
 
 At the end of the experiment, another process begins to transform the raw results in a format that is more suitable for
-the analysis. When this second process terminates, we get two gzipped tar files in `hector/output`: one that contains
+the analysis. When this second process terminates, we get two gzipped tar files in `hector/archives`: one that contains
 raw results, and another one that contains summarized results. These summarized results are ready to be analyzed, and
 these are the ones that are used to make our final figures.
 
@@ -126,35 +149,33 @@ these are the ones that are used to make our final figures.
 
 ### Run experiments
 
-```shell
-<username>@gros-20:~$ mkdir -p hector/archives
-```
+Let us reuse our `start.sh` script.
+
+**Experiment 1.** Requirements:
+
+* Estimated duration: 48 hours
+* Number of nodes: 20
 
 ```shell
-<username>@gros-20:~$ docker run -d --rm \
-                      --network host \
-                      --mount type=bind,source="$(pwd)",target=/root \
-                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
-                      adugois1/hector-benchmarking:latest \
-                      ./scripts/xp1_baseline.sh 10 48:00:00
+<username>@gros-20:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 21 48:00:00
 ```
 
+**Experiment 2.** Requirements:
+
+* Estimated duration: 48 hours
+* Number of nodes: 20
+* 
 ```shell
-<username>@gros-20:~$ docker run -d --rm \
-                      --network host \
-                      --mount type=bind,source="$(pwd)",target=/root \
-                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
-                      adugois1/hector-benchmarking:latest \
-                      ./scripts/xp2_replica_selection.sh 10 48:00:00
+<username>@gros-20:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 21 48:00:00
 ```
 
+**Experiment 3.** Requirements:
+
+* Estimated duration: 48 hours
+* Number of nodes: 20
+
 ```shell
-<username>@gros-20:~$ docker run -d --rm \
-                      --network host \
-                      --mount type=bind,source="$(pwd)",target=/root \
-                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
-                      adugois1/hector-benchmarking:latest \
-                      ./scripts/xp3_local_scheduling.sh 10 48:00:00
+<username>@gros-20:~$ ./start.sh scripts/xp3_local_scheduling.sh nancy gros 21 48:00:00
 ```
 
 ### Report results
