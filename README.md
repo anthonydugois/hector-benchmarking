@@ -83,26 +83,44 @@ single command:
 
 #### A simple experiment
 
-Let us start with a simple and quick experiment to check that everything is correctly setup.
+Let us start with a simple and quick experiment to check that everything is correctly setup. First, we create
+`hector/log` and `hector/output` folders to save some data from the Docker filesystem. `hector/log` will contain the
+experiment log files, which are useful to follow the process while it is running, and `hector/output` will contain the
+raw results of the experiment.
 
 ```shell
 <username>@gros-20:~$ mkdir -p hector/log hector/output
 ```
 
+Now we run the experiment (estimated duration: 60 minutes). This is done through a Docker container that handles all the
+dependencies and installation process. However, the container must be able to communicate with the remote nodes. It
+needs, for instance, to have access to our SSH keys. We also give him access to the SSL certificate and the
+`.python-grid5000.yaml` file.
+
 ```shell
-<username>@gros-20:~$ docker run -d --net=host \
-                      -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
+<username>@gros-20:~$ docker run --detach --network host \
                       -v ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro \
                       -v ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro \
+                      -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
+                      -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
                       -v ~/hector/log:/usr/src/app/log:rw \
                       -v ~/hector/output:/usr/src/app/experiment/output:rw \
                       adugois1/hector-benchmarking:latest \
-                      ./scripts/run.sh experiment/input/helloworld.csv --job-name helloworld --start-index 10 --walltime 1:00:00 --log log
+                      ./scripts/run.sh experiment/input/helloworld.csv --job-name helloworld --start-index 21 --walltime 1:00:00 --log log
 ```
 
+We can track the experiment process by looking at the logs, which update in real time through the network thanks to the
+shared filesystem of Grid'5000. If you used tmux, hit `Ctrl+B D` to go back on the frontend node, and watch the logs
+from there.
+
 ```shell
-<username>@gros-20:~$ tail -f ~/hector/log/helloworld.log
+<username>@fnancy:~$ tail -f ~/hector/log/helloworld.log
 ```
+
+At the end of the experiment, another process begins to transform the raw results in a format that is more suitable for
+the analysis. When this second process terminates, we get two gzipped tar files in `hector/output`: one that contains
+raw results, and another one that contains summarized results. These summarized results are ready to be analyzed, and
+these are the ones that are used to make our final figures.
 
 ## Reproduce experiments
 

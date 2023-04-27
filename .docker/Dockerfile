@@ -2,15 +2,18 @@ FROM python:3
 
 WORKDIR /usr/src/app
 
-COPY . .
-
 RUN apt-get update && \
-    apt-get install -y r-base texlive && \
-    pip install --no-cache-dir -r requirements.txt && \
+    apt-get install -y --no-install-recommends rsync r-base texlive && \
     R -e "install.packages('tidyverse')" && \
     R -e "install.packages('tikzDevice')"
 
-RUN chmod 777 scripts/*
+COPY requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY experiment scripts ./
+
+RUN chmod +x scripts/*
 
 RUN mkdir /root/.ssh && \
     echo "Host *" >> /root/.ssh/config && \

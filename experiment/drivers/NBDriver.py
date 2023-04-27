@@ -205,7 +205,7 @@ class NBDriver(Driver):
         with en.actions(roles=hosts) as actions:
             actions.docker_container(name=NBDriver.CONTAINER_NAME, image=self.docker_image, detach="no",
                                      network_mode="host", mounts=self.mounts(), command="{{command}}",
-                                     restart="yes", timeout="3600")
+                                     restart="yes", timeout="10800")  # timeout after 3 hours
 
             # actions.docker_container(name=NBDriver.CONTAINER_NAME, state="absent")
 
