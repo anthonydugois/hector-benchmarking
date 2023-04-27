@@ -15,9 +15,4 @@ COPY . ./
 
 RUN chmod +x scripts/*
 
-#RUN mkdir /root/.ssh && \
-#    echo "Host *" >> /root/.ssh/config && \
-#    echo "  StrictHostKeyChecking no" >> /root/.ssh/config && \
-#    echo "  HashKnownHosts no" >> /root/.ssh/config
-
 CMD [ "./scripts/run.sh", "--help" ]

@@ -40,12 +40,12 @@ with your username):
 and specify your Grid'5000 credentials:
 
     ```shell
-    <username>@fnancy:~$ echo '
+    user@fnancy:~$ echo '
     username: <username>
     password: <password>
     ' > ~/.python-grid5000.yaml
     
-    <username>@fnancy:~$ chmod 600 ~/.python-grid5000.yaml
+    user@fnancy:~$ chmod 600 ~/.python-grid5000.yaml
     ```
 
 ### Hello World
@@ -56,7 +56,7 @@ When reserving and using a node on Grid'5000 (in interactive mode), being discon
 the current job. To avoid this, we strongly recommend using tmux.
 
 ```shell
-<username>@fnancy:~$ tmux new -s my-session
+user@fnancy:~$ tmux new -s my-session
 ```
 
 In addition, this allows to go back on the frontend without terminating the current job (hit `Ctrl+B D` to return on the
@@ -64,11 +64,11 @@ frontend, and execute `tmux a -t my-session` to reattach the current session on 
 instance, to increase the walltime of a running job. See https://github.com/tmux/tmux/wiki for more details.
 
 ```shell
-<username>@fnancy:~$ oarsub -p gros -l host=1,walltime=1 -I
+user@fnancy:~$ oarsub -p gros -l host=1,walltime=1 -I
 OAR_JOB_ID=4088412
 # Interactive mode: waiting...
 # Starting...
-<username>@gros-20:~$ 
+user@gros-20:~$ 
 ```
 
 #### Setup Docker
@@ -77,7 +77,7 @@ The benchmarking system is available through a Docker image. Setting up Docker o
 single command:
 
 ```shell
-<username>@gros-20:~$ g5k-setup-docker -t
+user@gros-20:~$ g5k-setup-docker -t
 ```
 
 #### A simple experiment
@@ -88,7 +88,7 @@ experiment log files, which are useful to follow the process while it is running
 gzipped results of the experiment.
 
 ```shell
-<username>@gros-20:~$ mkdir -p hector/log hector/archives
+user@gros-20:~$ mkdir -p hector/log hector/archives
 ```
 
 Now we run the experiment (estimated duration: 60 minutes). This is done through a Docker container that handles all the
@@ -97,15 +97,15 @@ needs, for instance, to have access to our SSH keys. We also give him access to 
 `.python-grid5000.yaml` file.
 
 ```shell
-<username>@gros-20:~$ docker run --detach --network host \
-                      -v ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro \
-                      -v ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro \
-                      -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
-                      -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
-                      -v ~/hector/log:/usr/src/app/log:rw \
-                      -v ~/hector/archives:/usr/src/app/experiment/archives:rw \
-                      adugois1/hector-benchmarking:latest \
-                      sh scripts/helloworld.sh nancy gros 21 1:00:00
+user@gros-20:~$ docker run --detach --network host \
+                -v ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro \
+                -v ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro \
+                -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
+                -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
+                -v ~/hector/log:/usr/src/app/log:rw \
+                -v ~/hector/archives:/usr/src/app/archives:rw \
+                adugois1/hector-benchmarking:latest \
+                sh scripts/helloworld.sh nancy gros 21 1:00:00
 ```
 
 **Tip.** For more convenience, we can make a custom shell script `start.sh` to avoid crafting a complex Docker command
@@ -122,14 +122,14 @@ docker run --detach --network host \
    -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
    -v ~/.python-grid5000.yaml:/root/.python-grid5000.yaml:ro \
    -v ~/hector/log:/usr/src/app/log:rw \
-   -v ~/hector/archives:/usr/src/app/experiment/archives:rw \
+   -v ~/hector/archives:/usr/src/app/archives:rw \
    adugois1/hector-benchmarking:latest sh "$@"
 ```
 
 Do not forget to make it executable (`chmod +x start.sh`). Then we can use it like that:
 
 ```shell
-<username>@gros-20:~$ ./start.sh scripts/helloworld.sh nancy gros 21 1:00:00
+user@gros-20:~$ ./start.sh scripts/helloworld.sh nancy gros 21 1:00:00
 ```
 
 We can track the experiment process by looking at the logs, which update in real time through the network thanks to the
@@ -137,7 +137,7 @@ shared filesystem of Grid'5000. If you used tmux, hit `Ctrl+B D` to go back on t
 from there.
 
 ```shell
-<username>@fnancy:~$ tail -f ~/hector/log/helloworld.log
+user@fnancy:~$ tail -f ~/hector/log/helloworld.log
 ```
 
 At the end of the experiment, another process begins to transform the raw results in a format that is more suitable for
@@ -157,16 +157,16 @@ Let us reuse our `start.sh` script.
 * Number of nodes: 20
 
 ```shell
-<username>@gros-20:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 21 48:00:00
+user@gros-20:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 21 48:00:00
 ```
 
 **Experiment 2.** Requirements:
 
 * Estimated duration: 48 hours
 * Number of nodes: 20
-* 
+
 ```shell
-<username>@gros-20:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 21 48:00:00
+user@gros-20:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 21 48:00:00
 ```
 
 **Experiment 3.** Requirements:
@@ -175,22 +175,26 @@ Let us reuse our `start.sh` script.
 * Number of nodes: 20
 
 ```shell
-<username>@gros-20:~$ ./start.sh scripts/xp3_local_scheduling.sh nancy gros 21 48:00:00
+user@gros-20:~$ ./start.sh scripts/xp3_local_scheduling.sh nancy gros 21 48:00:00
 ```
 
 ### Report results
 
 ```shell
-<username>@gros-20:~$ mkdir -p hector/report
+user@gros-20:~$ mkdir -p hector/report
 ```
 
 ```shell
-<username>@gros-20:~$ docker run -d --rm \
-                      --network host \
-                      --mount type=bind,source="$(pwd)"/hector/archives,target=/usr/src/app/experiment/archives \
-                      --mount type=bind,source="$(pwd)"/hector/report,target=/usr/src/app/experiment/report \
-                      adugois1/hector-benchmarking:latest \
-                      ./scripts/report.sh
+user@gros-20:~$ docker run \
+                      -v ~/hector/archives:/usr/src/app/archives \
+                      -v ~/hector/report:/usr/src/app/report \
+                      adugois1/hector-benchmarking:latest sh scripts/report.sh
+```
+
+Downloading the report file on the local machine can be done through `scp`:
+
+```shell
+user@local:~$ scp user@nancy.g5k:~/hector/report/report.pdf ~/report.pdf
 ```
 
 ## Compare results
