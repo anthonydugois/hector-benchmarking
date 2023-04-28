@@ -12,9 +12,8 @@ The benchmarks are meant to run on the Grid'5000 testbed (https://www.grid5000.f
 experimental platform. We detail the procedure below to get access to Grid'5000:
 
 1. Request an account here: https://www.grid5000.fr/w/Grid5000:Get_an_account. Follow the provided guidelines, i.e.,
-request a regular account if you are an academic in France. Otherwise, request an Open Access account. In any case, if 
-you do not already have a Grid'5000 account, it is important to mention in the *Intended usage* form that you plan to
-use Grid'5000 to reproduce experiments as part of the Reproducibility Initiative of ICPP.
+request a free Open Access account, mentioning in the *Intended usage* form that you plan to use Grid'5000 to reproduce
+experiments as part of the Reproducibility Initiative of ICPP.
 
 2. Once your account has been activated, we recommend to read at least the 3 first sections of the Getting Started page
 to understand the basics of Grid'5000 architecture: https://www.grid5000.fr/w/Getting_Started.
@@ -132,9 +131,9 @@ Do not forget to make it executable (`chmod +x start.sh`). Then we can use it li
 user@gros-20:~$ ./start.sh scripts/helloworld.sh nancy gros 21 1:00:00
 ```
 
-We can track the experiment process by looking at the logs, which update in real time through the network thanks to the
-shared filesystem of Grid'5000. If you used tmux, hit `Ctrl+B D` to go back on the frontend node, and watch the logs
-from there.
+We can track the progress of the experiment by looking at the logs, which update in real time through the network thanks
+to the shared filesystem of Grid'5000. If you used tmux, hit `Ctrl+B D` to go back on the frontend node, and watch the
+logs from there.
 
 ```shell
 user@fnancy:~$ tail -f ~/hector/log/helloworld.log
@@ -186,9 +185,9 @@ user@gros-20:~$ mkdir -p hector/report
 
 ```shell
 user@gros-20:~$ docker run \
-                      -v ~/hector/archives:/usr/src/app/archives \
-                      -v ~/hector/report:/usr/src/app/report \
-                      adugois1/hector-benchmarking:latest sh scripts/report.sh
+                -v ~/hector/archives:/usr/src/app/archives \
+                -v ~/hector/report:/usr/src/app/report \
+                adugois1/hector-benchmarking:latest sh scripts/report.sh
 ```
 
 Downloading the report file on the local machine can be done through `scp`:
