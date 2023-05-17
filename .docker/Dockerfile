@@ -3,7 +3,7 @@ FROM python:3
 WORKDIR /usr/src/app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends rsync r-base texlive && \
+    apt-get install -y --no-install-recommends rsync r-base texlive latexmk && \
     R -e "install.packages('tidyverse')" && \
     R -e "install.packages('tikzDevice')"
 

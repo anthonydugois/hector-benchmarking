@@ -196,6 +196,22 @@ Downloading the report file on the local machine can be done through `scp`:
 user@local:~$ scp user@nancy.g5k:~/hector/report/report.pdf ~/report.pdf
 ```
 
+### Quick report
+
+```shell
+user@gros-20:~$ mkdir -p hector/report
+```
+
+```shell
+user@gros-20:~$ docker run \
+                -v ~/hector/report:/usr/src/app/report \
+                adugois1/hector-benchmarking:latest sh scripts/quick_report.sh
+```
+
+```shell
+user@local:~$ scp user@nancy.g5k:~/hector/report/quick_report.pdf ~/quick_report.pdf
+```
+
 ## Compare results
 
 The report is a PDF file that should summarize the results shown in the paper: Figures 4, 5, 6, 7, 8, 9 and 10, and
