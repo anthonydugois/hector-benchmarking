@@ -177,20 +177,66 @@ user@gros-20:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 21 48:00:
 user@gros-20:~$ ./start.sh scripts/xp3_local_scheduling.sh nancy gros 21 48:00:00
 ```
 
-### Report results
+**Making advanced reservation.** As these experiments take a long time to run, we strongly recommend to perform them on
+the weekend, as the Grid'5000 platform does not allow to run long jobs during weekdays from 9AM to 7PM. Thus, one may
+reserve nodes in advance to ensure that launching the 3 experiments will be possible. As each experiment needs 20 nodes
+and 1 driver node, this makes 63 nodes in total to reserve for 48 hours. Recall that the reserved nodes must constitute
+a contiguous range within a single experiment.
+
+Let us reserve 63 nodes on the gros cluster of Nancy datacenter (do not forget to adapt the reservation date
+accordingly):
 
 ```shell
-user@gros-20:~$ mkdir -p hector/report
+user@fnancy:~$ oarsub -p "host LIKE 'gros-1_.%' OR \
+                          host LIKE 'gros-2_.%' OR \
+                          host LIKE 'gros-3_.%' OR \
+                          host LIKE 'gros-4_.%' OR \
+                          host LIKE 'gros-5_.%' OR \
+                          host LIKE 'gros-6_.%' OR \
+                          host LIKE 'gros-70.%' OR \
+                          host LIKE 'gros-71.%' OR \
+                          host LIKE 'gros-72.%'" -l host=63,walltime=48:00:00 -r '2023-06-16 19:00:00'
+OAR_JOB_ID=4088412
 ```
 
+Hosts `gros_1*` and `gros_2*` will be used for the experiment 1, with the host `gros_70` as the driver node.
+Hosts `gros_3*` and `gros_4*` will be used for the experiment 2, with the host `gros_71` as the driver node.
+Hosts `gros_5*` and `gros_6*` will be used for the experiment 3, with the host `gros_72` as the driver node.
+
+Grid'5000 allows one to launch long jobs sooner than 7PM if the nodes are still free starting from 5PM. Thus, at Friday
+5PM, one may delete the previous reservation and launch the 3 experiments above:
+
 ```shell
-user@gros-20:~$ docker run \
+user@fnancy:~$ oardel 4088412 # replace with the actual JOB_ID
+```
+
+For example, here is the full command suite to launch the first experiment:
+
+```shell
+user@fnancy:~$ tmux new -s xp1
+user@fnancy:~$ oarsub -p gros-70 -l host=1,walltime=48:00:00 -I
+# ...
+user@gros-70:~$ g5k-setup-docker -t
+user@gros-70:~$ mkdir -p hector/log hector/archives
+user@gros-70:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 10 48:00:00
+```
+
+Then hit `Ctrl+B D` to go back to frontend and launch experiments 2 and 3 in parallel.
+
+### Report results
+
+Once archives have been obtained in `~/hector/archives`, we are ready to generate the PDF report that contains all
+figures and tables. Reserve a node, setup Docker, and build the report:
+
+```shell
+user@gros-20:~$ mkdir -p hector/report && \
+                docker run \
                 -v ~/hector/archives:/usr/src/app/archives \
                 -v ~/hector/report:/usr/src/app/report \
                 adugois1/hector-benchmarking:latest sh scripts/report.sh
 ```
 
-Downloading the report file on the local machine can be done through `scp`:
+Finally, downloading the report file on the local machine can be done through `scp`:
 
 ```shell
 user@local:~$ scp user@nancy.g5k:~/hector/report/report.pdf ~/report.pdf
@@ -198,15 +244,17 @@ user@local:~$ scp user@nancy.g5k:~/hector/report/report.pdf ~/report.pdf
 
 ### Quick report
 
-```shell
-user@gros-20:~$ mkdir -p hector/report
-```
+For convenience, we include the data we used to build the figures in the article. One may reproduce the exact same
+figures by quickly generating a report based on these data:
 
 ```shell
-user@gros-20:~$ docker run \
-                -v ~/hector/report:/usr/src/app/report \
+user@gros-20:~$ mkdir -p hector/report && \
+                docker run \
+                -v ~/hector/report:/usr/src/app/report:rw \
                 adugois1/hector-benchmarking:latest sh scripts/quick_report.sh
 ```
+
+Then download the report on the local machine:
 
 ```shell
 user@local:~$ scp user@nancy.g5k:~/hector/report/quick_report.pdf ~/quick_report.pdf
