@@ -5,7 +5,8 @@ WORKDIR /usr/src/app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends rsync r-base texlive latexmk && \
     R -e "install.packages('tidyverse')" && \
-    R -e "install.packages('tikzDevice')"
+    R -e "install.packages('tikzDevice')" && \
+    R -e "install.packages('xtable')"
 
 COPY requirements.txt ./
 

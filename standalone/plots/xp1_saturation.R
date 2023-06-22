@@ -45,3 +45,28 @@ plot.xp0.throughput <- ggplot(data = format_data(data.speed)) +
 update_theme_for_latex(plot.xp0.throughput)
 
 dev.off()
+
+tab.throughput <- format_data(data.speed) %>%
+    select(mean_speed, config_file) %>%
+    pivot_wider(names_from = config_file, values_from = mean_speed) %>%
+    mutate(label = "Throughput",
+           Cassandra = 1 / Cassandra,
+           Hector = 1 / Hector,
+           abs_diff = Hector - Cassandra,
+           rel_diff = (abs_diff / Cassandra) * 100) %>%
+    relocate(label) %>%
+    mutate(Cassandra = paste0(floor(Cassandra), " ops/s"),
+           Hector = paste0(floor(Hector), " ops/s"),
+           abs_diff = paste0(floor(abs_diff), " ops/s"),
+           rel_diff = paste0(as.numeric(num(floor(rel_diff * 100) / 100, digits = 2)), "%")) %>%
+    rename(" " = label,
+           "Cassandra" = Cassandra,
+           "Hector" = Hector,
+           "Abs. diff." = abs_diff,
+           "Rel. diff." = rel_diff)
+
+print(xtable(tab.throughput, align = "cccccc"),
+      floating = FALSE,
+      include.rownames = FALSE,
+      booktabs = TRUE,
+      file = paste0(OUT, "/xp1_throughput_table.tex"))
