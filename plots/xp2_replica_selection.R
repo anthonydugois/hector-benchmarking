@@ -77,6 +77,35 @@ update_theme_for_latex(plot.xp2.throughput)
 
 dev.off()
 
+tab.throughput <- format_speed(data.speed %>%
+                                   group_by(id) %>%
+                                   summarise_mean(speed)) %>%
+    mutate(mean_throughput = 1 / mean_speed,
+           median_throughput = 1 / median_speed,
+           min_throughput = 1 / max_speed,
+           max_throughput = 1 / min_speed) %>%
+    select(mean_throughput, median_throughput, min_throughput, max_throughput, key_dist, config_file) %>%
+    pivot_longer(c(mean_throughput, median_throughput, min_throughput, max_throughput), names_to = "stat_name", values_to = "stat_value") %>%
+    group_by(stat_name) %>%
+    pivot_wider(names_from = config_file, values_from = stat_value) %>%
+    relocate(stat_name, key_dist, DS, C3, PA) %>%
+    mutate(stat_name = factor(stat_name,
+                              levels = c("mean_throughput", "median_throughput", "min_throughput", "max_throughput"),
+                              labels = c("Mean", "Median", "Min", "Max")),
+           DS = floor(DS), C3 = floor(C3), PA = floor(PA)) %>%
+    arrange(stat_name, key_dist) %>%
+    rename("Stat." = stat_name,
+           "Key popularity" = key_dist,
+           "DS" = DS, "C3" = C3, "PA" = PA)
+
+print(xtable(tab.throughput, align = "cccccc", digits = 0),
+      floating = FALSE,
+      include.rownames = FALSE,
+      booktabs = TRUE,
+      hline.after = c(-1, 0, 2, 4, 6, nrow(tab.throughput)),
+      sanitize.text.function = identity,
+      file = paste0(OUT, "/xp2_throughput_table.tex"))
+
 format_read <- function(.data) {
     config.levels <- c("xp2/cassandra-ds.yaml", "xp2/cassandra-c3.yaml", "xp2/cassandra-pa.yaml")
     config.labels <- c("DS", "C3", "PA")

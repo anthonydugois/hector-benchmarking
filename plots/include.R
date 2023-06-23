@@ -7,6 +7,7 @@ suppressMessages({
     library(ggplot2)
     library(scales)
     library(tikzDevice)
+    library(xtable)
 })
 
 ARGS <- commandArgs(trailingOnly = TRUE)

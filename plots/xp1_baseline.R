@@ -62,6 +62,32 @@ update_theme_for_latex(plot.xp1.latency)
 
 dev.off()
 
+tab.latency <- format_data_latency(data.latency) %>%
+    select(stat_name, mean_stat_value, main_rate_limit, config_file) %>%
+    pivot_wider(names_from = config_file, values_from = mean_stat_value) %>%
+    mutate(Cassandra = Cassandra * NANOS_TO_MILLIS,
+           Hector = Hector * NANOS_TO_MILLIS,
+           abs_diff = Hector - Cassandra,
+           rel_diff = (abs_diff / Cassandra) * 100) %>%
+    arrange(stat_name, main_rate_limit) %>%
+    mutate(Cassandra = paste0(as.numeric(num(floor(Cassandra * 1000) / 1000, digits = 3)), " ms"),
+           Hector = paste0(as.numeric(num(floor(Hector * 1000) / 1000, digits = 3)), " ms"),
+           abs_diff = paste0(as.numeric(num(floor(abs_diff * 1000) / 1000, digits = 3)), " ms"),
+           rel_diff = paste0(as.numeric(num(floor(rel_diff * 100) / 100, digits = 2)), "%")) %>%
+    rename("Stat." = stat_name,
+           "Arrival rate" = main_rate_limit,
+           "Cassandra" = Cassandra,
+           "Hector" = Hector,
+           "Abs. diff." = abs_diff,
+           "Rel. diff." = rel_diff)
+
+print(xtable(tab.latency, align = "ccccccc"),
+      floating = FALSE,
+      include.rownames = FALSE,
+      booktabs = TRUE,
+      hline.after = c(-1, 0, 2, 4, 6, nrow(tab.latency)),
+      file = paste0(OUT, "/xp1_latency_table.tex"))
+
 format_data_speed <- function(.data) {
     config.levels <- c("xp1/cassandra-base.yaml", "xp1/cassandra-se.yaml")
     config.labels <- c("Cassandra", "Hector")
@@ -93,3 +119,28 @@ plot.xp1.throughput <- ggplot(data = format_data_speed(data.speed)) +
 update_theme_for_latex(plot.xp1.throughput)
 
 dev.off()
+
+tab.throughput <- format_data_speed(data.speed) %>%
+    select(mean_speed, config_file) %>%
+    pivot_wider(names_from = config_file, values_from = mean_speed) %>%
+    mutate(label = "Throughput",
+           Cassandra = 1 / Cassandra,
+           Hector = 1 / Hector,
+           abs_diff = Hector - Cassandra,
+           rel_diff = (abs_diff / Cassandra) * 100) %>%
+    relocate(label) %>%
+    mutate(Cassandra = paste0(floor(Cassandra), " ops/s"),
+           Hector = paste0(floor(Hector), " ops/s"),
+           abs_diff = paste0(floor(abs_diff), " ops/s"),
+           rel_diff = paste0(as.numeric(num(floor(rel_diff * 100) / 100, digits = 2)), "%")) %>%
+    rename(" " = label,
+           "Cassandra" = Cassandra,
+           "Hector" = Hector,
+           "Abs. diff." = abs_diff,
+           "Rel. diff." = rel_diff)
+
+print(xtable(tab.throughput, align = "cccccc"),
+      floating = FALSE,
+      include.rownames = FALSE,
+      booktabs = TRUE,
+      file = paste0(OUT, "/xp1_throughput_table.tex"))

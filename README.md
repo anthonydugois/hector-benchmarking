@@ -9,7 +9,8 @@ Evaluate Scheduling Strategies in Persistent Key-Value Stores* and submitted to 
 ### Installation
 
 The benchmarks are meant to run on the Grid'5000 testbed (https://www.grid5000.fr/w/Grid5000:Home), which is a French
-experimental platform. We detail the procedure below to get access to Grid'5000:
+experimental platform. Unfortunately, the benchmarking software **cannot** be run on a different platform, as the
+deployment process is tied to the Grid'5000 API. We detail the procedure below to get access to Grid'5000:
 
 1. Request an account here: https://www.grid5000.fr/w/Grid5000:Get_an_account. Follow the provided guidelines, i.e.,
 request a free Open Access account, mentioning in the *Intended usage* form that you plan to use Grid'5000 to reproduce
@@ -49,6 +50,8 @@ and specify your Grid'5000 credentials:
 
 ### Hello World
 
+Let's begin with a dummy benchmark to check that everything is working as expected.
+
 #### Reserve a node
 
 When reserving and using a node on Grid'5000 (in interactive mode), being disconnected from the session will terminate
@@ -58,9 +61,12 @@ the current job. To avoid this, we strongly recommend using tmux.
 user@fnancy:~$ tmux new -s my-session
 ```
 
-In addition, this allows to go back on the frontend without terminating the current job (hit `Ctrl+B D` to return on the
-frontend, and execute `tmux a -t my-session` to reattach the current session on the screen). This is useful, for
-instance, to increase the walltime of a running job. See https://github.com/tmux/tmux/wiki for more details.
+In addition, once connected to a node, this allows to go back on the frontend without terminating the current job, which
+would also release the node (hit `Ctrl+B D` to return on the frontend, and execute `tmux a -t my-session` from the
+frontend to reattach the current session on the screen and go back on the reserved node). This is useful, for instance,
+to increase the walltime of a running job. See https://github.com/tmux/tmux/wiki for more details.
+
+Let's reserve and connect to a node in the cluster named `gros` (from Nancy's site) for 1 hour:
 
 ```shell
 user@fnancy:~$ oarsub -p gros -l host=1,walltime=1 -I
@@ -70,9 +76,11 @@ OAR_JOB_ID=4088412
 user@gros-20:~$ 
 ```
 
+In this example, the reservation system of Grid'5000 gave us access to the node 20.
+
 #### Setup Docker
 
-The benchmarking system is available through a Docker image. Setting up Docker on a Grid'5000 node can be done in a
+Our benchmarking system is available through a Docker image. Setting up Docker on a Grid'5000 node can be done in a
 single command:
 
 ```shell
@@ -81,10 +89,9 @@ user@gros-20:~$ g5k-setup-docker -t
 
 #### A simple experiment
 
-Let us start with a simple and quick experiment to check that everything is correctly setup. First, we create
-`hector/log` and `hector/archives` folders to save some data from the Docker filesystem. `hector/log` will contain the
-experiment log files, which are useful to follow the process while it is running, and `hector/archives` will contain the
-gzipped results of the experiment.
+Let's start with a simple and quick experiment. First, we create `hector/log` and `hector/archives` folders to save some
+data from the Docker filesystem. `hector/log` will contain the experiment log files, which are useful to follow the
+benchmarking process while it is running, and `hector/archives` will contain the gzipped results of the experiment.
 
 ```shell
 user@gros-20:~$ mkdir -p hector/log hector/archives
@@ -106,6 +113,16 @@ user@gros-20:~$ docker run --detach --network host \
                 adugois1/hector-benchmarking:latest \
                 sh scripts/helloworld.sh nancy gros 21 1:00:00
 ```
+
+Notice the last line `sh scripts/helloworld.sh nancy gros 21 1:00:00`. This is the script that starts the actual
+benchmarking process. All benchmarking scripts of this document take exactly 4 parameters:
+
+* the Grid'5000 site (in this example, this is `nancy`),
+* the cluster in which we want to reserve nodes (in this example, this is `gros`),
+* the starting index of the nodes we want to reserve (in this example, this is the node `21`, which means that we
+use the 5 nodes 20, 21, 22, 23, and 24: 1 driver node and 4 experiment nodes, among which 1 benchmarking node and 3
+nodes for the system itself),
+* the expected walltime of the experiment, in format `hh:mm:ss` (in this example, this is 1 hour).
 
 **Tip.** For more convenience, we can make a custom shell script `start.sh` to avoid crafting a complex Docker command
 each time we need to launch an experiment. This will be useful in the next section.
@@ -131,24 +148,24 @@ Do not forget to make it executable (`chmod +x start.sh`). Then we can use it li
 user@gros-20:~$ ./start.sh scripts/helloworld.sh nancy gros 21 1:00:00
 ```
 
-We can track the progress of the experiment by looking at the logs, which update in real time through the network thanks
-to the shared filesystem of Grid'5000. If you used tmux, hit `Ctrl+B D` to go back on the frontend node, and watch the
-logs from there.
+Once it has started, we can track the progress of the experiment by looking at the logs, which update in real time 
+through the network thanks to the shared filesystem of Grid'5000. If you used tmux, hit `Ctrl+B D` to go back on the 
+frontend node, and watch the logs from there.
 
 ```shell
 user@fnancy:~$ tail -f ~/hector/log/helloworld.log
 ```
 
-At the end of the experiment, another process begins to transform the raw results in a format that is more suitable for
-the analysis. When this second process terminates, we get two gzipped tar files in `hector/archives`: one that contains
-raw results, and another one that contains summarized results. These summarized results are ready to be analyzed, and
-these are the ones that are used to make our final figures.
+At the end of the experiment, another process automatically begins to transform the raw results in a format that is more
+suitable for the analysis. When this second process terminates, we get two gzipped tar files in `hector/archives`: one
+that contains raw results, and another one that contains summarized results. These summarized results are ready to be 
+analyzed, and these are the ones that are used to make our final figures.
 
 ## Reproduce experiments
 
-### Run experiments
+> **Disclaimer: make sure to read the full section before launching any experiment.**
 
-Let us reuse our `start.sh` script.
+We are now ready to launch the actual experiments. Let us reuse our `start.sh` script.
 
 **Experiment 1.** Requirements:
 
@@ -156,7 +173,7 @@ Let us reuse our `start.sh` script.
 * Number of nodes: 20
 
 ```shell
-user@gros-20:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 21 48:00:00
+user@gros-70:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 10 48:00:00
 ```
 
 **Experiment 2.** Requirements:
@@ -165,7 +182,7 @@ user@gros-20:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 21 48:00:00
 * Number of nodes: 20
 
 ```shell
-user@gros-20:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 21 48:00:00
+user@gros-71:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 30 48:00:00
 ```
 
 **Experiment 3.** Requirements:
@@ -174,7 +191,7 @@ user@gros-20:~$ ./start.sh scripts/xp2_replica_selection.sh nancy gros 21 48:00:
 * Number of nodes: 20
 
 ```shell
-user@gros-20:~$ ./start.sh scripts/xp3_local_scheduling.sh nancy gros 21 48:00:00
+user@gros-72:~$ ./start.sh scripts/xp3_local_scheduling.sh nancy gros 50 48:00:00
 ```
 
 **Making advanced reservation.** As these experiments take a long time to run, we strongly recommend to perform them on
@@ -196,21 +213,25 @@ user@fnancy:~$ oarsub -p "host LIKE 'gros-1_.%' OR \
                           host LIKE 'gros-70.%' OR \
                           host LIKE 'gros-71.%' OR \
                           host LIKE 'gros-72.%'" -l host=63,walltime=48:00:00 -r '2023-06-16 19:00:00'
-OAR_JOB_ID=4088412
 ```
 
 Hosts `gros_1*` and `gros_2*` will be used for the experiment 1, with the host `gros_70` as the driver node.
 Hosts `gros_3*` and `gros_4*` will be used for the experiment 2, with the host `gros_71` as the driver node.
 Hosts `gros_5*` and `gros_6*` will be used for the experiment 3, with the host `gros_72` as the driver node.
 
-Grid'5000 allows one to launch long jobs sooner than 7PM if the nodes are still free starting from 5PM. Thus, at Friday
-5PM, one may delete the previous reservation and launch the 3 experiments above:
+Note that the experiments will not start automatically. At this point, we only made sure that the nodes are reserved and
+won't be used by other people.
+
+Grid'5000 allows one to launch long jobs sooner than 7PM if the nodes are still free starting from 5PM. Thus, at 
+**Friday 5PM**, one may delete the previous reservation and manually launch the 3 experiments above:
 
 ```shell
-user@fnancy:~$ oardel 4088412 # replace with the actual JOB_ID
+user@fnancy:~$ oardel 4088412 # replace with the actual JOB_ID of the previous reservation
 ```
 
-For example, here is the full command suite to launch the first experiment:
+**Tip:** if you lost the `JOB_ID`, execute `oarstat -u` to see the list of your reserved/running jobs.
+
+To summarize, here is the full command suite to launch the first experiment (after having deleted the reservation):
 
 ```shell
 user@fnancy:~$ tmux new -s xp1
@@ -221,22 +242,66 @@ user@gros-70:~$ mkdir -p hector/log hector/archives
 user@gros-70:~$ ./start.sh scripts/xp1_baseline.sh nancy gros 10 48:00:00
 ```
 
+1. We start a new tmux session.
+2. We connect to a driver node. In this example, we launch the experiment 1, and we planned to use the node 70 to driver 
+this experiment. Moreover, we reserve this node for 48 hours (the expected duration of the experiment).
+3. We setup Docker on the driver node.
+4. We create the two needed folders.
+5. We actually start the experiment on cluster `gros` of Nancy's site, on nodes 10 to 29 (as the experiment needs 20 
+nodes), for 48 hours.
+
 Then hit `Ctrl+B D` to go back to frontend and launch experiments 2 and 3 in parallel.
+
+### Shorter experiments
+
+We provide shorter versions of the experiments for convenience. Note that these versions still take several hours to 
+execute, although they should necessitate at most 10 hours, which means that one may launch them during the week (either
+during the day between 9AM and 19PM, or during the night between 19PM and 9AM).
+
+**Experiment 1.** Requirements:
+
+* Estimated duration: 10 hours
+* Number of nodes: 20
+
+```shell
+user@gros-70:~$ ./start.sh scripts/xp1_baseline__short.sh nancy gros 10 10:00:00
+```
+
+**Experiment 2.** Requirements:
+
+* Estimated duration: 10 hours
+* Number of nodes: 20
+
+```shell
+user@gros-71:~$ ./start.sh scripts/xp2_replica_selection__short.sh nancy gros 30 10:00:00
+```
+
+**Experiment 3.** Requirements:
+
+* Estimated duration: 10 hours
+* Number of nodes: 20
+
+```shell
+user@gros-72:~$ ./start.sh scripts/xp3_local_scheduling__short.sh nancy gros 50 10:00:00
+```
+
+**Warning:** the results of these shorter versions may differ from the expected results described at the end of this
+document. However, the main takeaways should still be visible.
 
 ### Report results
 
 Once archives have been obtained in `~/hector/archives`, we are ready to generate the PDF report that contains all
-figures and tables. Reserve a node, setup Docker, and build the report:
+figures and tables. Reserve any node, setup Docker, and build the report:
 
 ```shell
-user@gros-20:~$ mkdir -p hector/report && \
+user@gros-99:~$ mkdir -p hector/report && \
                 docker run \
                 -v ~/hector/archives:/usr/src/app/archives \
                 -v ~/hector/report:/usr/src/app/report \
                 adugois1/hector-benchmarking:latest sh scripts/report.sh
 ```
 
-Finally, downloading the report file on the local machine can be done through `scp`:
+Finally, downloading the report file on the local machine can be done, for instance, through `scp`:
 
 ```shell
 user@local:~$ scp user@nancy.g5k:~/hector/report/report.pdf ~/report.pdf
@@ -245,10 +310,10 @@ user@local:~$ scp user@nancy.g5k:~/hector/report/report.pdf ~/report.pdf
 ### Quick report
 
 For convenience, we include the data we used to build the figures in the article. One may reproduce the exact same
-figures by quickly generating a report based on these data:
+figures **without launching any experiment** by quickly generating a report based on these data:
 
 ```shell
-user@gros-20:~$ mkdir -p hector/report && \
+user@gros-99:~$ mkdir -p hector/report && \
                 docker run \
                 -v ~/hector/report:/usr/src/app/report:rw \
                 adugois1/hector-benchmarking:latest sh scripts/quick_report.sh
