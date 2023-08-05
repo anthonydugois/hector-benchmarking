@@ -30,15 +30,17 @@ plot.xp0.throughput <- ggplot(data = format_data(data.speed)) +
     geom_col(mapping = aes(x = config_file,
                            y = 1 / mean_speed * OPSS_TO_KOPSS,
                            fill = config_file),
-             width = 0.4) +
+             width = 0.4,
+             colour = "black") +
     geom_errorbar(mapping = aes(x = config_file,
                                 ymin = 1 / mean_high_speed * OPSS_TO_KOPSS,
                                 ymax = 1 / mean_low_speed * OPSS_TO_KOPSS),
-                  width = 0.1) +
+                  width = 0.1,
+                  colour = "black") +
     coord_cartesian(ylim = c(0, NA)) +
     scale_x_discrete(name = "Version") +
     scale_y_continuous(name = "Throughput (kops/s)") +
-    scale_fill_discrete(name = "Version", guide = "none") +
+    scale_fill_viridis_d(name = "Version", guide = "none", option = "viridis", begin = 0.5, end = 1.0) +
     theme_bw() +
     theme(axis.title.x = element_blank())
 

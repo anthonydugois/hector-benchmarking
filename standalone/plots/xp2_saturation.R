@@ -69,7 +69,7 @@ plot.xp3.throughput <- ggplot(data = format_speed(data.speed)) +
     scale_x_continuous(name = "Runtime (min)") +
     scale_y_continuous(name = "Throughput (kops/s)",
                        breaks = seq(0, 1250, 250)) +
-    scale_colour_discrete(name = "Strategy") +
+    scale_colour_viridis_d(name = "Strategy", option = "magma", begin = 0.0, end = 0.75) +
     scale_shape_discrete(name = "Strategy") +
     theme_bw()
 
@@ -158,8 +158,8 @@ plot.xp3.read <- ggplot(data = format_read(data.read.mean)) +
     scale_x_continuous(name = "Runtime (min)") +
     scale_y_continuous(name = "Disk-read (MB/s)",
                        breaks = seq(0, 450, 100)) +
-    scale_colour_discrete(name = "Strategy") +
-    scale_fill_discrete(name = "Strategy") +
+    scale_colour_viridis_d(name = "Strategy", option = "magma", begin = 0.0, end = 0.75) +
+    scale_fill_viridis_d(name = "Strategy", option = "magma", begin = 0.0, end = 0.75) +
     scale_shape_discrete(name = "Strategy") +
     theme_bw()
 

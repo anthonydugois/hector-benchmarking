@@ -68,7 +68,7 @@ plot.xp2.throughput <- ggplot(data = format_throughput(data.throughput)) +
              y = 40,
              yend = 40,
              linetype = "dashed",
-             colour = COLOURS[[1]],
+             colour = "black",
              alpha = 0.6) +
     annotate(geom = "segment",
              x = -Inf,
@@ -76,26 +76,26 @@ plot.xp2.throughput <- ggplot(data = format_throughput(data.throughput)) +
              y = 50,
              yend = 50,
              linetype = "dashed",
-             colour = COLOURS[[2]],
+             colour = "black",
              alpha = 0.6) +
     annotate(geom = "label",
              x = 15,
              y = 40,
              size = 2.2,
-             colour = COLOURS[[1]],
+             colour = "black",
              label = "FCFS",
              label.padding = unit(0.1, "lines")) +
     annotate(geom = "label",
              x = 15,
              y = 50,
              size = 2.2,
-             colour = COLOURS[[2]],
+             colour = "black",
              label = "RML",
              label.padding = unit(0.1, "lines")) +
     coord_cartesian(ylim = c(0, 55)) +
     scale_x_continuous(name = "Arrival rate (kops/s)", breaks = seq(10, 60, 10)) +
     scale_y_continuous(name = "Throughput (kops/s)", breaks = seq(0, 50, 10)) +
-    scale_fill_discrete(name = "Strategy") +
+    scale_fill_viridis_d(name = "Strategy", option = "plasma", begin = 0.0, end = 0.5) +
     scale_alpha_manual(values = c(1, 0.4), guide = "none") +
     theme_bw()
 
@@ -141,7 +141,7 @@ plot.xp2.latency <- ggplot() +
     coord_cartesian(ylim = c(0, NA)) +
     scale_x_continuous(name = "Arrival rate (kops/s)", breaks = seq(10, 60, 10)) +
     scale_y_continuous(name = "Latency (ms)") +
-    scale_colour_discrete(name = "Strategy") +
+    scale_colour_viridis_d(name = "Strategy", option = "plasma", begin = 0.0, end = 0.5) +
     scale_shape_discrete(name = "Strategy") +
     scale_alpha_manual(values = c(1, 0.4), guide = "none") +
     theme_bw()
@@ -178,11 +178,12 @@ plot.xp2.small_large <- ggplot(data = format_small_large(data.latency.type)) +
                            y = stat_value * NANOS_TO_MILLIS,
                            fill = type),
              width = 0.6,
+             colour = "black",
              position = position_dodge2(padding = 0.25)) +
     facet_wrap(vars(paste0(rate * OPSS_TO_KOPSS, " kops/s")), scales = "free", ncol = 4) +
     scale_x_discrete(name = "Strategy") +
     scale_y_continuous(name = "Latency (ms)") +
-    scale_fill_discrete(name = "Type") +
+    scale_fill_viridis_d(name = "Type", option = "mako", begin = 0.0, end = 1.0) +
     theme_bw() +
     theme(axis.title.x = element_blank(),
           legend.position = "bottom")

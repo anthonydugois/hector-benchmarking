@@ -34,18 +34,20 @@ plot.xp0.latency <- ggplot(data = format_data(data.latency)) +
     geom_col(mapping = aes(x = config_file,
                            y = mean_stat_value * NANOS_TO_MILLIS,
                            fill = config_file),
-             width = 0.4) +
+             width = 0.4,
+             colour = "black") +
     geom_errorbar(mapping = aes(x = config_file,
                                 ymin = mean_low_stat_value * NANOS_TO_MILLIS,
                                 ymax = mean_high_stat_value * NANOS_TO_MILLIS),
-                  width = 0.1) +
+                  width = 0.1,
+                  colour = "black") +
     facet_grid(rows = vars(main_rate_limit),
                cols = vars(stat_name),
                scales = "free") +
     coord_cartesian(ylim = c(0, NA)) +
     scale_x_discrete(name = "Version") +
     scale_y_continuous(name = "Latency (ms)") +
-    scale_fill_discrete(name = "Version", guide = "none") +
+    scale_fill_viridis_d(name = "Version", guide = "none", option = "viridis", begin = 0.5, end = 1.0) +
     theme_bw() +
     theme(axis.title.x = element_blank(),
           axis.text.x = element_text(angle = 20, hjust = 0.8, vjust = 1))
